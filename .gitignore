@@ -1,26 +1,50 @@
-# Python cache
-__pycache__/
-*.py[cod]
+# =========================
+# 🔹 Backend (Django)
+# =========================
 
-# Virtual environment
-venv/
-env/
-.venv/
+backend/__pycache__/
+backend/*.py[cod]
+
+# Virtual environments
+backend/venv/
+backend/env/
+backend/.venv/
 
 # Environment variables
-.env
+backend/.env
 
-# Django stuff
-*.log
-db.sqlite3
-media/
+# Database
+backend/db.sqlite3
 
-# Static files (optional if collected)
-staticfiles/
+# Logs
+backend/*.log
 
-# Migrations (optional rule)
-**/migrations/*.py
-!**/migrations/__init__.py
+# Static & media (optional)
+backend/staticfiles/
+backend/media/
+
+# =========================
+# 🔹 Frontend (React)
+# =========================
+
+# Node modules
+frontend/node_modules/
+
+# Build output
+frontend/build/
+frontend/dist/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Environment variables
+frontend/.env
+
+# =========================
+# 🔹 Common (both)
+# =========================
 
 # IDEs
 .vscode/
@@ -29,3 +53,6 @@ staticfiles/
 # OS files
 .DS_Store
 Thumbs.db
+
+# General logs
+*.log
