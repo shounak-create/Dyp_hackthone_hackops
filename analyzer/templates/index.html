@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Analyzer</title>
+</head>
+<body>
+
+    <h1>GitHub Analyzer</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="repo_url" placeholder="Enter GitHub Repo">
+        <button type="submit">Analyze</button>
+    </form>
+
+</body>
+</html>
