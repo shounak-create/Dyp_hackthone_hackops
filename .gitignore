@@ -42,6 +42,8 @@ frontend/yarn-error.log*
 # Environment variables
 frontend/.env
 
+.env
+
 # =========================
 # 🔹 Common (both)
 # =========================
@@ -49,6 +51,9 @@ frontend/.env
 # IDEs
 .vscode/
 .idea/
+
+__pycache__/
+*.pyc
 
 # OS files
 .DS_Store
