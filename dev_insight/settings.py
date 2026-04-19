@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "analyzer", "rest_framework", "corsheaders",
 ]
 
+AUTH_USER_MODEL = 'analyzer.CustomUser'
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

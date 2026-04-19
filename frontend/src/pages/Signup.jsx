@@ -1,62 +1,55 @@
 import { useState } from "react";
-import API from "../services/api";
+import axios from "axios";
+import { redirect } from "react-router";
 
-const Signup = () => {
-  const [formData, setFormData] = useState({
-    username: "",
+function Signup() {
+  const [form, setForm] = useState({
     email: "",
+    username: "",
     password: "",
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSignup = async () => {
     try {
-      const res = await API.post("register/", formData);
-      alert("User registered successfully");
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/signup/",
+        form
+      );
+
+      alert("Signup successful!");
+      redirect("/")
+      console.log(res.data);
     } catch (err) {
       console.error(err);
-      alert("Error registering user");
+      alert("Signup failed");
     }
   };
 
   return (
-    <div>
+    <div style={styles.container}>
       <h2>Signup</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-        />
+      <input name="email" placeholder="Email" onChange={handleChange} />
+      <input name="username" placeholder="Username" onChange={handleChange} />
+      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
-
-        <button type="submit">Signup</button>
-      </form>
+      <button onClick={handleSignup}>Signup</button>
     </div>
   );
+}
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    width: "300px",
+    margin: "100px auto",
+  },
 };
 
 export default Signup;
