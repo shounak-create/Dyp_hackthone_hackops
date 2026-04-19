@@ -1,17 +1,28 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import Analize from "./Analize";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./Login";
+import Analyze from "./Analyze";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/signup" element={<Signup />} />
+
+        {/* Public Route */}
         <Route path="/" element={<Login />} />
-        <Route path="/analize" element={<Analize />} />
+
+        {/* Protected Route */}
+        <Route
+          path="/analyze"
+          element={
+            <ProtectedRoute>
+              <Analyze />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
