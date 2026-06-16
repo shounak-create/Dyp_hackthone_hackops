@@ -61,3 +61,8 @@ Thumbs.db
 
 # General logs
 *.log
+
+# Root-level (project not nested under backend/)
+venv/
+staticfiles/
+db.sqlite3

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export default function Analize() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -32,7 +34,7 @@ export default function Analize() {
     if (!userId) return;
     setHistoryLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/analysis/${userId}/`);
+      const res = await fetch(`${API_URL}/api/analysis/${userId}/`);
       if (res.ok) {
         const data = await res.json();
         data.sort((a, b) => b.id - a.id);
@@ -70,7 +72,7 @@ export default function Analize() {
     }, 2000);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/audit/', {
+      const response = await fetch(`${API_URL}/api/audit/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username })
@@ -87,7 +89,7 @@ export default function Analize() {
       // Save Audit to History in Backend
       if (user) {
         try {
-          await fetch('http://127.0.0.1:8000/api/analysis/create/', {
+          await fetch(`${API_URL}/api/analysis/create/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

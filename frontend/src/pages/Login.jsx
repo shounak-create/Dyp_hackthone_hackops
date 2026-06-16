@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; 
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -18,7 +20,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/login/", form);
+      const res = await axios.post(`${API_URL}/api/login/`, form);
       
       // Save user and redirect
       localStorage.setItem("user", JSON.stringify(res.data.user));
