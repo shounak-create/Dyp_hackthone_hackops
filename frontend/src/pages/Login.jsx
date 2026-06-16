@@ -22,12 +22,11 @@ export default function Login() {
       
       // Save user and redirect
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/analyze"); // ✅ Correct way to redirect in React
+      navigate("/analyze"); 
 
     } catch (err) {
       console.error(err);
-      // Failsafe error message if the backend doesn't send one
-      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+      setError(err.response?.data?.error || err.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -36,59 +35,57 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#0f172a', /* Matches main app background */
+      backgroundColor: '#0d1117',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      padding: '20px'
+      padding: '24px'
     }}>
       
-      {/* INJECTED CSS */}
-      <style>{`
-        .login-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        .login-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
-        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-      `}</style>
+      {/* BRANDING IDENTIFIER (OFF-WHITE TRIANGLE) */}
+      <div style={{ marginBottom: '24px' }}>
+        <svg height="32" viewBox="0 0 75 65" fill="#f0f6fc">
+          <polygon points="37.5,0 75,65 0,65" />
+        </svg>
+      </div>
 
       <div style={{
-        background: '#1e293b',
-        padding: '40px',
-        borderRadius: '16px',
+        background: '#161b22',
+        padding: '32px 40px',
+        borderRadius: '6px',
         width: '100%',
-        maxWidth: '400px',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-        border: '1px solid #334155'
+        maxWidth: '420px',
+        border: '1px solid #30363d',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
       }}>
         
         {/* BRANDING */}
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{ 
-            fontSize: '2rem', 
-            fontWeight: '800', 
-            margin: '0 0 5px 0', 
-            background: 'linear-gradient(to right, #60a5fa, #c084fc)', 
-            WebkitBackgroundClip: 'text', 
-            WebkitTextFillColor: 'transparent' 
+            fontSize: '1.4rem', 
+            fontWeight: '600', 
+            margin: '0 0 8px 0', 
+            color: '#f0f6fc',
+            letterSpacing: '-0.5px'
           }}>
-            DevInsight
+            Sign in to DevInsight
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0 }}>
-            Sign in to access your dashboard
+          <p style={{ color: '#8b949e', fontSize: '0.875rem', margin: 0 }}>
+            Enter your credentials to access your dashboard
           </p>
         </div>
 
         {/* ERROR MESSAGE */}
         {error && (
           <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            color: '#fca5a5',
+            background: 'var(--error-bg)',
+            color: 'var(--error)',
             padding: '12px',
-            borderRadius: '8px',
-            border: '1px solid rgba(239,68,68,0.3)',
-            marginBottom: '20px',
-            fontSize: '0.9rem',
+            borderRadius: '6px',
+            border: '1px solid var(--error-border)',
+            marginBottom: '24px',
+            fontSize: '0.875rem',
             textAlign: 'center'
           }}>
             {error}
@@ -96,69 +93,72 @@ export default function Login() {
         )}
 
         {/* LOGIN FORM */}
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <label style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: '600' }}>Email Address</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ color: '#8b949e', fontSize: '0.75rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Email Address
+            </label>
             <input 
               name="email" 
               type="email"
-              className="login-input"
               placeholder="developer@example.com" 
               onChange={handleChange} 
               required
-              style={{
-                padding: '14px',
-                borderRadius: '8px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                fontSize: '15px',
-                transition: 'all 0.2s ease'
-              }}
+              className="vercel-input"
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
-            <label style={{ color: '#cbd5e1', fontSize: '0.85rem', fontWeight: '600' }}>Password</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ color: '#8b949e', fontSize: '0.75rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Password
+            </label>
             <input 
               name="password" 
               type="password" 
-              className="login-input"
               placeholder="••••••••" 
               onChange={handleChange} 
               required
-              style={{
-                padding: '14px',
-                borderRadius: '8px',
-                border: '1px solid #475569',
-                backgroundColor: '#0f172a',
-                color: '#f8fafc',
-                fontSize: '15px',
-                transition: 'all 0.2s ease'
-              }}
+              className="vercel-input"
             />
           </div>
 
           <button 
             type="submit" 
-            className="login-btn"
             disabled={loading}
+            className="vercel-btn-primary"
             style={{
-              padding: '14px',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-              color: '#fff',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              marginTop: '5px'
+              marginTop: '8px',
+              width: '100%'
             }}
           >
-            {loading ? 'Authenticating...' : 'Secure Login'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
+          
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '16px', 
+            borderTop: '1px solid #30363d',
+            paddingTop: '20px'
+          }}>
+            <span style={{ color: '#8b949e', fontSize: '0.875rem' }}>Don't have an account? </span>
+            <button 
+              type="button"
+              onClick={() => navigate("/signup")}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#58a6ff',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                padding: '0',
+                textDecoration: 'underline'
+              }}
+            >
+              Sign Up
+            </button>
+          </div>
           
         </form>
       </div>

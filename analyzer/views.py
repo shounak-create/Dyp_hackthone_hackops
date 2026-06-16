@@ -1,50 +1,24 @@
-from dotenv import load_dotenv
-load_dotenv()
 import os
 import json
+import requests
+from dotenv import load_dotenv
 from openai import OpenAI
-from rest_framework.decorators import api_view
 
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
 from django.contrib.auth import authenticate
+
 from .models import CustomUser, UserAnalysis
 from .serialize import UserSerializer, UserAnalysisSerializer
 
-# NOTE: You must have a .env file in your root directory with: OPENAI_API_KEY=sk-...
-client = OpenAI(api_key=os.environ.get("GROQ_API_KEY"),base_url="https://api.groq.com/openai/v1")
+load_dotenv()
 
-# @api_view(['POST'])
-# def generate_career_audit(request):
-#     github_username = request.data.get('username', 'Unknown User')
-    
-#     system_prompt = """
-#     You are a brutally honest senior technical recruiter. 
-#     Output a JSON response with exact keys: 'github_username', 'estimated_level', 'brutal_summary', 'skill_gaps' (list), and 'roadmap_90_days' (list of dicts with 'month' and 'focus').
-#     """
-
-#     try:
-#         completion = client.chat.completions.create(
-#             model="openai/gpt-oss-120b",
-#             response_format={ "type": "json_object" },
-#             messages=[
-#                 {"role": "system", "content": system_prompt},
-#                 {"role": "user", "content": f"Write a brutal code audit for GitHub user: {github_username}"}
-#             ]
-#         )
-        
-#         audit_result = json.loads(completion.choices[0].message.content)
-#         return Response(audit_result)
-
-#     except Exception as e:
-#         return Response({"error": str(e)}, status=500)
-
-import requests
-import json
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
+# Setup Groq Client
+client = OpenAI(
+    api_key=os.environ.get("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 @api_view(['POST'])
 def generate_career_audit(request):
@@ -54,36 +28,51 @@ def generate_career_audit(request):
         return Response({"error": "Username is required"}, status=400)
 
     try:
+        # Setup Headers for GitHub PAT to avoid Rate Limits (Hackathon Lifesaver)
+        headers = {}
+        github_pat = os.environ.get("GITHUB_PAT")
+        if github_pat:
+            headers["Authorization"] = f"token {github_pat}"
 
-        github_url = f"https://api.github.com/users/{github_username}/repos"
+        # 1. Fetch User Profile Data (Bio, Followers, etc.)
+        profile_url = f"https://api.github.com/users/{github_username}"
+        profile_response = requests.get(profile_url, headers=headers)
+        
+        if profile_response.status_code != 200:
+            print("[ERROR] GITHUB API ERROR:", profile_response.text)
+            return Response({"error": f"GitHub user not found or rate limited. Code: {profile_response.status_code}"}, status=404)
+            
+        profile_data = profile_response.json()
+        print("GITHUB RAW DATA:", profile_data) # <--- ADD THIS
+        print("Hellow YASH PANCHAL!")
+        bio = profile_data.get("bio", "No bio provided")
+        followers = profile_data.get("followers", 0)
+        public_repos = profile_data.get("public_repos", 0)
 
-        params = {
-            "sort": "stars",
-            "per_page": 6
-        }
+        # 2. Fetch Repositories Data
+        repos_url = f"https://api.github.com/users/{github_username}/repos"
+        params = {"sort": "stars", "per_page": 6}
+        repos_response = requests.get(repos_url, headers=headers, params=params)
 
-        gh_response = requests.get(github_url, params=params)
+        if repos_response.status_code != 200:
+            return Response({"error": "Failed to fetch GitHub repositories."}, status=404)
 
-        if gh_response.status_code != 200:
-            return Response({"error": "GitHub user not found"}, status=404)
-
-        repos_data = gh_response.json()
-
+        repos_data = repos_response.json()
         
         formatted_repos = []
-
         for repo in repos_data:
             formatted_repos.append(
-                f"{repo['name']} ({repo['language']}) - ⭐ {repo['stargazers_count']}: {repo['description']}"
+                f"{repo['name']} ({repo.get('language', 'Unknown')}) - ⭐ {repo.get('stargazers_count', 0)}: {repo.get('description', '')}"
             )
 
         repos_text = "\n".join(formatted_repos)
 
+        # 3. Build the AI Prompt with Profile + Repos
         system_prompt = """
         You are a brutally honest senior technical recruiter.
-        Analyze the developer based ONLY on the provided GitHub repositories.
+        Analyze the developer based ONLY on the provided GitHub profile and repositories.
 
-        Output JSON with:
+        Output JSON with EXACTLY these keys:
         - github_username
         - estimated_level
         - brutal_summary
@@ -93,15 +82,19 @@ def generate_career_audit(request):
 
         user_prompt = f"""
         GitHub Username: {github_username}
+        Bio: {bio}
+        Followers: {followers}
+        Total Public Repos: {public_repos}
 
-        Repositories:
+        Top Repositories:
         {repos_text}
 
         Perform a strict technical evaluation.
         """
 
+        # 4. Call Groq (Fixed the model name here!)
         completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="openai/gpt-oss-20b", 
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -110,11 +103,12 @@ def generate_career_audit(request):
         )
 
         audit_result = json.loads(completion.choices[0].message.content)
-
         return Response(audit_result)
 
     except Exception as e:
+        print("[ERROR] SERVER ERROR:", str(e))
         return Response({"error": str(e)}, status=500)
+
 
 @api_view(['POST'])
 def signup(request):
@@ -162,6 +156,7 @@ def create_analysis(request):
         
     except CustomUser.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
+        
     data = request.data.copy()
     data['user'] = user.id
 
@@ -177,6 +172,5 @@ def create_analysis(request):
 @api_view(['GET'])
 def get_user_analyses(request, user_id):
     analyses = UserAnalysis.objects.filter(user_id=user_id)
-
     serializer = UserAnalysisSerializer(analyses, many=True)
     return Response(serializer.data)
